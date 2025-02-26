@@ -1,36 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Email Ingestion System
 
-## Getting Started
+A Next.js application for automatically downloading PDF attachments from configured email accounts and storing them in a local directory with metadata in a PostgreSQL database.
 
-First, run the development server:
+## Project Overview
+
+This application allows you to:
+- Configure multiple email accounts (Gmail supported)
+- Automatically fetch emails and download PDF attachments
+- Store attachment metadata in a PostgreSQL database and also in Local Storage.
+- View and manage downloaded PDFs through a simple web interface
+
+## Project Structure
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+├── .env                  # Environment variables
+├── .next                 # Next.js build directory
+├── prisma                # Prisma database configuration
+│   ├── migrations        # Database migration files
+│   ├── schema.prisma     # Prisma schema definition
+│   └── seed.ts           # Database seeding script
+├── pdfs                  # Downloaded PDF storage directory
+├── src                   # Source code
+│   ├── app               # Next.js application
+│   │   ├── api           # API routes
+│   │   │   └── email-ingestion  # Email ingestion endpoints
+│   │   │       ├── attachments  # Attachment handling
+│   │   │       ├── check        # Email checking
+│   │   │       ├── fetch-emails # Email fetching
+│   │   │       └── test-connection # Connection testing
+│   ├── lib               # Utility libraries
+│   │   └── email-services.ts # Email service functions
+│   └── services          # Service layer
+│       └── emailIngestion.ts # Email ingestion business logic
+├── public                # Static files
+├── package.json          # Project dependencies
+└── README.md             # This documentation
+```
+## Prerequisites
+
+- Node.js 16.x or higher
+- PostgreSQL database
+- Gmail account with OAuth credentials
+- Basic understanding of Next.js and TypeScript
+
+## Setup Instructions
+
+### 1. Clone and Install Dependencies
+
+```bash
+git clone <repository-url>
+cd email-ingestion
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Database Connection
+DATABASE_URL="postgresql://<username>:<password>@localhost:5432/<database_name>"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Gmail OAuth Credentials
+- GMAIL_CLIENT_ID="your-client-id-from-google-cloud-console"
+- GMAIL_CLIENT_SECRET="your-client-secret-from-google-cloud-console"
+- GMAIL_REDIRECT_URI="https://developers.google.com/oauthplayground"
+- GMAIL_REFRESH_TOKEN="your-refresh-token-from-oauth-playground"
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+##To obtain Gmail OAuth credentials:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Go to Google Cloud Console
+- Create a new project
+- Enable the Gmail API
+- Create OAuth 2.0 credentials
+- Use OAuth Playground to get refresh token
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Database Setup
+Initialize your database with Prisma:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npx prisma migrate dev
+```
+This will:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Apply all migrations in the prisma/migrations directory
+Create necessary tables for email accounts and attachments
+Generate Prisma client
+
+## Start Development Server
+```bash
+npm run dev
+```
+
+Open http://localhost:3000 in your browser.
+Usage Guide
+Setting Up Email Accounts
+
+Navigate to the email configuration page
+Add a new email account with the following details:
+
+Email address
+Connection type (currently only Gmail supported with different Configurations IMAP , POP3 , GMAIL_API)
+Any specific folder to monitor (default: inbox)
+
+
+
+## Testing Email Ingestion
+
+Send a test email with PDF attachment to your configured email account
+Click "Check Inbox" button on the dashboard
+The system will:
+
+## Connect to your email account
+Download new PDF attachments
+Store them in the pdfs/ directory
+Record metadata in the database
+
+
+
+## Verification
+To verify the system is working:
+
+- Check the pdfs/ directory for downloaded files
+- Check the database for new attachment records
+- View the attachment listing in the web interface
+
+## Troubleshooting
+Common Issues
+
+- Connection errors: Verify your Gmail credentials and refresh token
+- Permission denied: Ensure the application has write permissions to the pdfs/ directory
+- Database connection failures: Check your PostgreSQL connection string and credentials
+
+## Logs
+- Check the console logs for detailed error information. The application logs connection attempts, email fetching, and attachment downloading operations.
+Security Considerations
+
+- This application stores email credentials in plain text in the .env file
+- For production use, consider implementing proper secret management
+= Restrict access to the application and database to authorized personnel only
+
