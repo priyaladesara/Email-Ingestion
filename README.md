@@ -130,6 +130,11 @@ Common Issues
 - Permission denied: Ensure the application has write permissions to the pdfs/ directory
 - Database connection failures: Check your PostgreSQL connection string and credentials
 
+## API documentation
+```bash
+https://documenter.getpostman.com/view/40381972/2sAYdfpWRx
+```
+
 ## Logs
 - Check the console logs for detailed error information. The application logs connection attempts, email fetching, and attachment downloading operations.
 Security Considerations
@@ -137,4 +142,6 @@ Security Considerations
 - This application stores email credentials in plain text in the .env file
 - For production use, consider implementing proper secret management
 = Restrict access to the application and database to authorized personnel only
+
+
 
