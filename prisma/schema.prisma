@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConnectionType {
+  IMAP
+  POP3
+  GMAIL_API
+  OUTLOOK_API
+}
+
+model EmailIngestionConfig {
+  id            String          @id @default(cuid())
+  emailAddress  String          
+  connectionType ConnectionType
+  username      String?
+  password      String?         @db.Text
+  host          String          @default("N/A")
+  port          Int?            @default(995)
+  token         String?         @db.Text  // Increased size for OAuth tokens
+  isActive      Boolean         @default(true)
+  lastChecked   DateTime?       // Track when emails were last checked
+  errorMessage  String?         @db.Text  // Store last error message
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  attachments   PDFAttachment[]
+
+  @@index([emailAddress]) // Keep index for faster queries
+  @@index([connectionType, isActive]) // Querying active configs by type
+}
+
+model PDFAttachment {
+  id              String               @id @default(cuid())
+  configId        String
+  config          EmailIngestionConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+  fromAddress     String?              @db.Text  // Email addresses can be long
+  dateReceived    DateTime
+  subject         String               @db.Text  // Email subjects can be long
+  fileName        String
+  localPath       String
+  fileSize        Int?                 // Track file size
+  processed       Boolean              @default(false) // Track processing status
+  processingError String?              @db.Text  // Store processing errors
+  createdAt       DateTime             @default(now())
+
+  @@index([configId])
+  @@index([processed]) // For querying unprocessed attachments
+}
